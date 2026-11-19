@@ -20,6 +20,7 @@ Older releases are at <https://github.com/sorokin-vladimir/tele/releases>.
 ### Added
 
 - `photos.quick_look` opens a video, round video, audio file or document in the Quick Look panel on macOS instead of the default app.
+- `telegram.session_storage: keychain` keeps the Telegram session in the macOS login Keychain instead of `session.json`. Off by default; an existing `session.json` is imported on the next start.
 
 ## [2.1.3] - 2026-11-13
 

@@ -3,6 +3,7 @@ package config_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/sorokin-vladimir/tele/internal/config"
@@ -316,4 +317,46 @@ func TestKeybindingOverrides_AbsentSectionIsNil(t *testing.T) {
 	cfg, err := config.Load(f, t.TempDir())
 	require.NoError(t, err)
 	assert.Nil(t, cfg.KeybindingOverrides())
+}
+
+func TestLoad_SessionStorageDefaultsToFile(t *testing.T) {
+	f := filepath.Join(t.TempDir(), "config.yml")
+	require.NoError(t, os.WriteFile(f, []byte("telegram:\n  api_id: 1\n  api_hash: h\n"), 0600))
+
+	cfg, err := config.Load(f, "/default/state")
+	require.NoError(t, err)
+
+	assert.Equal(t, "file", cfg.Telegram.SessionStorage)
+	assert.Empty(t, cfg.Warnings)
+}
+
+func TestLoad_KeychainIsKeptOnlyOnMacOS(t *testing.T) {
+	f := filepath.Join(t.TempDir(), "config.yml")
+	require.NoError(t, os.WriteFile(f, []byte(
+		"telegram:\n  api_id: 1\n  api_hash: h\n  session_storage: keychain\n"), 0600))
+
+	cfg, err := config.Load(f, "/default/state")
+	require.NoError(t, err)
+
+	if runtime.GOOS == "darwin" {
+		assert.Equal(t, "keychain", cfg.Telegram.SessionStorage)
+		assert.Empty(t, cfg.Warnings)
+		return
+	}
+	assert.Equal(t, "file", cfg.Telegram.SessionStorage, "no Keychain here, so the session stays in its file")
+	require.Len(t, cfg.Warnings, 1)
+	assert.Contains(t, cfg.Warnings[0].Text, "only available on macOS")
+}
+
+func TestLoad_AnUnknownSessionStorageIsRepairedToFile(t *testing.T) {
+	f := filepath.Join(t.TempDir(), "config.yml")
+	require.NoError(t, os.WriteFile(f, []byte(
+		"telegram:\n  api_id: 1\n  api_hash: h\n  session_storage: vault\n"), 0600))
+
+	cfg, err := config.Load(f, "/default/state")
+	require.NoError(t, err)
+
+	assert.Equal(t, "file", cfg.Telegram.SessionStorage)
+	require.Len(t, cfg.Warnings, 1)
+	assert.Contains(t, cfg.Warnings[0].Text, "session_storage")
 }

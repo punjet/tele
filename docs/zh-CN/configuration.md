@@ -152,6 +152,20 @@ proxy:
 
 太旧而无法被连接的 `tele`（1.11 或较早的 2.0 测试版）仍然会持有状态目录，但不允许任何东西连接它。在它旁边启动的较新版本会等待几秒，然后说明是哪个进程持有该目录，并退出。两者使用不同版本的协议时也是如此。请退出正在运行的那个，然后重新启动。
 
+<a id="session-in-the-keychain-macos"></a>
+### 钥匙串中的会话（macOS）
+
+Telegram 会话，即让你保持登录的密钥，默认保存在状态目录下的 `session.json` 文件中，只有你能读取。在 macOS 上，`telegram.session_storage: keychain` 会改为把它保存在登录钥匙串中：
+
+```yaml
+telegram:
+  session_storage: keychain # file | keychain
+```
+
+默认值是 `file`。在其他系统上，`keychain` 会被忽略并给出警告，会话仍保存在文件中，因此同一份配置可以在多台机器之间共用。该设置只在 `tele` 启动时读取一次。
+
+使用 `keychain` 时，已有的 `session.json` 会在下次启动时导入，通过读回来校验，然后删除：你会保持登录。钥匙串条目是名为 `tele` 的通用密码，账户为状态目录的绝对路径，因此每个状态目录都有各自的会话。退出登录，或账户在 `tele` 运行期间结束，都会像删除文件一样删除该条目。`tele` 通过 `/usr/bin/security` 访问钥匙串，会话不会出现在命令行中。改回 `file` 不会把会话复制出来：你需要重新登录，旧条目会留在“钥匙串访问”中，直到你删除它。
+
 <a id="running-without-a-window"></a>
 ## 无窗口运行
 

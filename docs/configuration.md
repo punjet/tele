@@ -170,6 +170,26 @@ A newer one started beside it waits a few seconds, then says which process holds
 The same happens when the two speak different versions of their protocol.
 Quit the running one and start again.
 
+### Session in the Keychain (macOS)
+
+By default the Telegram session, the key that keeps you logged in, is the file `session.json` in the state directory, readable only by you.
+On macOS, `telegram.session_storage: keychain` keeps it in your login Keychain instead:
+
+```yaml
+telegram:
+  session_storage: keychain # file | keychain
+```
+
+The default is `file`.
+On any other system `keychain` is ignored with a warning, and the session stays in the file, so one config can be shared between machines.
+The setting is read once, when `tele` starts.
+
+With `keychain`, an existing `session.json` is imported on the next start, checked by reading it back, and then deleted: you stay logged in.
+The item is a generic password named `tele`, with the absolute state directory as its account, so each state directory has its own.
+Logging out, or an account that ends while `tele` runs, deletes the item as it deletes the file.
+`tele` talks to the Keychain through `/usr/bin/security`, and the session never appears in a command line.
+Going back to `file` does not copy the session out: you log in again, and the old item stays in Keychain Access until you delete it.
+
 ## Running without a window
 
 `tele daemon` holds the state directory with no window of its own: it keeps the connection, delivers desktop notifications, and lets windows join it, until you stop it with Ctrl+C.
