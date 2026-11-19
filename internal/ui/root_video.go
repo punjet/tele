@@ -384,7 +384,7 @@ func (m RootModel) handleVideoPlayerKey(keyStr string) (RootModel, tea.Cmd) {
 		return m.pageModal(-1)
 	case "o":
 		if m.videoPlayer != nil && m.videoPlayer.path != "" {
-			openPath(m.videoPlayer.path)
+			openMedia(m.videoPlayer.path, m.quickLookViewer())
 		}
 		return m, nil
 	case " ", "space":

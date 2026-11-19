@@ -60,6 +60,8 @@ photos:
   kitty_placement_cap: 16 # max inline images kept on the terminal at once
   max_long_side_px: 800 # cap a rendered image's long side; height also ≤ 2/3 pane
   disk_cache_size: 268435456 # 256 MB of fetched chat media kept between runs
+  quick_look: false # macOS: open video, audio and documents in Quick Look, not the default app
+  quick_look_command: "" # the program that shows Quick Look; empty uses qlmanage
 
 avatars:
   disk_cache_size: 16777216 # 16 MB of people's pictures, budgeted separately
@@ -223,6 +225,9 @@ Telegram 不公开它的限制，所以上述额度只是估计。如果 `tele` 
 `kitty_placement_cap` 限制终端上同时存在的 Kitty 图片数量。只传输屏幕上的图片（加上几张刚滚过去的）；更早的会被清除。一次传输整个图片很多的聊天，可能超出终端的图片上限并导致图片错乱（缩小或错位）。如果仍然看到这种情况，请调低这个上限。
 
 `max_long_side_px` 以像素为单位限制聊天中图片的长边（与桌面客户端固定的媒体尺寸相对应）。高度还会额外限制在聊天面板的 2/3 以内，这样高图片不会占满整个视图。想让图片更大就调高，想更紧凑就调低。
+
+`quick_look` 用于 macOS：视频、圆形视频、音频文件或文档会在 Quick Look 面板中打开（即 Finder 中按空格键显示的预览），而不是用默认应用打开。图片不受影响。该设置默认关闭，在其他系统上会被忽略；参见 [media.md](media.md#quick-look-macos)。
+`quick_look_command` 指定显示该面板的程序，文件作为其唯一参数传入。留空时使用 `qlmanage -p`，它在较新的 macOS 上遇到视频会崩溃；承载 Quick Look 面板的小应用也能预览视频。
 
 <a id="avatars"></a>
 ## 头像

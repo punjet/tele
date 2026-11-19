@@ -738,7 +738,7 @@ func TestOpenDocumentCmd_LaunchesTheSavedFile(t *testing.T) {
 	restore := SetOpenPathForTest(func(p string) { opened = p })
 	defer restore()
 
-	msg := openDocumentCmd(context.Background(), o, 1, 5, t.TempDir(), 0)()
+	msg := openDocumentCmd(context.Background(), o, 1, 5, t.TempDir(), 0, "")()
 
 	done, ok := msg.(documentOpenDoneMsg)
 	if !ok {

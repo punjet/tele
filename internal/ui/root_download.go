@@ -146,7 +146,7 @@ func (m RootModel) openPhotoExternal(photoID int64) (RootModel, tea.Cmd) {
 // matching indicator (and surfaces any error).
 func (m RootModel) startDocumentOpen(msgID int, label string) (RootModel, tea.Cmd) {
 	serial := m.statusBar.StartDownload(label)
-	return m, openDocumentCmd(m.ctx, m.owner, m.currentChatID, msgID, m.tmpDir, serial)
+	return m, openDocumentCmd(m.ctx, m.owner, m.currentChatID, msgID, m.tmpDir, serial, m.quickLookViewer())
 }
 
 // selectedDownloadLabel returns the download indicator label for the selected
@@ -218,17 +218,18 @@ func saveFileCmd(ctx context.Context, o Owner, chatID int64, msgID int, slot dom
 }
 
 // openDocumentCmd saves a document into tmpDir and opens it in the OS default
-// application (e.g. a video player). Runs async; the download may be large. It
+// application (e.g. a video player), or in Quick Look when quickLook names a viewer and
+// the OS is macOS. Runs async; the download may be large. It
 // always returns a documentOpenDoneMsg so the caller can clear the status-bar
 // download indicator identified by serial (and surface any error).
-func openDocumentCmd(ctx context.Context, o Owner, chatID int64, msgID int, tmpDir string, serial int) tea.Cmd {
+func openDocumentCmd(ctx context.Context, o Owner, chatID int64, msgID int, tmpDir string, serial int, quickLook string) tea.Cmd {
 	return func() tea.Msg {
 		path, err := o.SaveMedia(ctx, chatID, msgID, domain.DocFull, tmpDir, downloadRef(serial))
 		if err != nil {
 			text, sev, _ := errText("open file", err)
 			return documentOpenDoneMsg{serial: serial, errText: text, sev: sev}
 		}
-		openPath(path)
+		openMedia(path, quickLook)
 		return documentOpenDoneMsg{serial: serial}
 	}
 }

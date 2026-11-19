@@ -28,6 +28,19 @@ On Linux this needs a running PulseAudio or PipeWire server, which is the deskto
 
 An inline thumbnail preview with a `▶` and duration overlay; round notes are shown as a circle.
 Press `o` to play in the system player.
+On macOS, `photos.quick_look: true` shows it in Quick Look instead, see [Quick Look](#quick-look-macos).
+
+<a id="quick-look-macos"></a>
+## Quick Look (macOS)
+
+With `photos.quick_look: true`, a video, round video, audio file or document opens in the Quick Look panel, the preview Finder shows on Space, instead of the default app.
+Photos are not affected: `o` still opens the in-app viewer and `O` the OS image viewer.
+The setting is off by default and ignored on other systems.
+Links still open in the browser.
+
+Opening a second file replaces the panel that is open.
+If Quick Look cannot preview a file and quits at once, `tele` hands the file to the default app instead.
+The panel can appear behind the terminal window: click it or switch to it with Cmd+Tab.
 
 ## GIFs
 

@@ -71,6 +71,8 @@ photos:
   kitty_placement_cap: 16 # max inline images kept on the terminal at once
   max_long_side_px: 800 # cap a rendered image's long side; height also ≤ 2/3 pane
   disk_cache_size: 268435456 # 256 MB of fetched chat media kept between runs
+  quick_look: false # macOS: open video, audio and documents in Quick Look, not the default app
+  quick_look_command: "" # the program that shows Quick Look; empty uses qlmanage
 
 avatars:
   disk_cache_size: 16777216 # 16 MB of people's pictures, budgeted separately
@@ -294,6 +296,12 @@ Telegram не публикует свои ограничения, поэтому
 `max_long_side_px` ограничивает длинную сторону изображения в чате в пикселях (как фиксированный размер медиа в десктопных клиентах).
 Высота дополнительно ограничена двумя третями панели чата, чтобы высокое фото не занимало весь экран.
 Увеличьте значение, чтобы изображения были крупнее, или уменьшите, чтобы они были компактнее.
+
+`quick_look` нужна на macOS: видео, кружок, аудиофайл или документ открываются в панели Quick Look, той самой, что Finder показывает по пробелу, а не в приложении по умолчанию.
+Фото это не касается.
+По умолчанию выключена, в других системах игнорируется; см. [media.md](media.md#quick-look-macos).
+`quick_look_command` — программа, которая показывает панель; файл передаётся ей единственным аргументом.
+Если пусто, используется `qlmanage -p`, а он в новых macOS падает на видео; маленькое приложение с панелью Quick Look показывает и видео.
 
 <a id="avatars"></a>
 ## Аватары

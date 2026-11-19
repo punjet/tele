@@ -66,6 +66,8 @@ photos:
   kitty_placement_cap: 16 # max inline images kept on the terminal at once
   max_long_side_px: 800 # cap a rendered image's long side; height also ≤ 2/3 pane
   disk_cache_size: 268435456 # 256 MB of fetched chat media kept between runs
+  quick_look: false # macOS: open video, audio and documents in Quick Look, not the default app
+  quick_look_command: "" # the program that shows Quick Look; empty uses qlmanage
 
 avatars:
   disk_cache_size: 16777216 # 16 MB of people's pictures, budgeted separately
@@ -279,6 +281,12 @@ Lower the cap if you still see that.
 `max_long_side_px` caps a rendered inline image's long side in pixels (mirrors the desktop clients' fixed media size).
 The height is additionally bounded to 2/3 of the chat pane so a tall photo never dominates the view.
 Raise it for larger inline images, lower it for more compact ones.
+
+`quick_look` is for macOS: a video, round video, audio file or document opens in the Quick Look panel, the preview Finder shows on Space, instead of the default app.
+Photos are not affected.
+It is off by default and ignored on other systems; see [media.md](media.md#quick-look-macos).
+`quick_look_command` names the program that shows the panel, given the file as its one argument.
+Empty uses `qlmanage -p`, which on recent macOS aborts on video; a small app that hosts the Quick Look panel previews video too.
 
 ## Avatars
 

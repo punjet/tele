@@ -96,6 +96,14 @@ type PhotosConfig struct {
 	// directory under a fixed bound and is deleted on exit. See issues #174 and
 	// #196.
 	DiskCacheSize int64 `mapstructure:"disk_cache_size"`
+	// QuickLook opens a video, round video, audio file or document in the macOS
+	// Quick Look panel rather than the default application. Photos are not
+	// affected, and it is ignored off macOS.
+	QuickLook bool `mapstructure:"quick_look"`
+	// QuickLookCommand is the program that shows the Quick Look panel, given the
+	// file as its one argument. Empty means /usr/bin/qlmanage -p, which aborts on
+	// video on recent macOS; a small app hosting QLPreviewPanel does not.
+	QuickLookCommand string `mapstructure:"quick_look_command"`
 }
 
 // AvatarsConfig controls people's pictures. It is separate from PhotosConfig

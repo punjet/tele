@@ -92,6 +92,21 @@ func TestTakesHold_photos_max_long_side_px(t *testing.T) {
 		func(m RootModel) any { return m.chat.MaxMediaPx() }, 1234)
 }
 
+func TestTakesHold_photos_quick_look(t *testing.T) {
+	takesHoldOnReload(t, "photos.quick_look", true,
+		func(m RootModel) any { return m.quickLookViewer() != "" }, true)
+}
+
+func TestTakesHold_photos_quick_look_command(t *testing.T) {
+	m, store := applyModel(t, "photos:\n  quick_look: true\n")
+	require.Equal(t, quickLookBin, m.quickLookViewer(), "with no command set, qlmanage shows the panel")
+
+	require.NoError(t, store.Set("photos.quick_look_command", "/Applications/ql"))
+	m, _ = m.reloadFromDisk()
+
+	assert.Equal(t, "/Applications/ql", m.quickLookViewer())
+}
+
 // mediaOwner refuses every download and remembers which were asked for.
 type mediaOwner struct {
 	Owner
