@@ -10,6 +10,7 @@ import (
 	"github.com/gotd/log/logzap"
 	"go.uber.org/zap"
 
+	"github.com/gotd/td/session"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/telegram/updates"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/sorokin-vladimir/tele/internal/appkey"
 	"github.com/sorokin-vladimir/tele/internal/domain"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 	"github.com/sorokin-vladimir/tele/internal/store"
 	"github.com/sorokin-vladimir/tele/internal/telerr"
 	"github.com/sorokin-vladimir/tele/internal/version"
@@ -30,6 +32,8 @@ import (
 type Endpoint struct {
 	Key         appkey.Key
 	SessionFile string
+	// Session is where the session is kept. Nil means the file at SessionFile.
+	Session sessionstore.Store
 	// Resolver is how the connection reaches Telegram: directly, or through
 	// the proxy the config named when the process started.
 	Resolver dcs.Resolver
@@ -121,7 +125,10 @@ func (c *GotdClient) acquireAPI() (*tg.Client, error) {
 // onAuth is called with the authenticated user (id, username and name) before
 // readyCh is closed; may be nil.
 func (c *GotdClient) Connect(ctx context.Context, af *AuthFlow, readyCh chan<- struct{}, onAuth func(domain.User)) error {
-	sess := NewFileSession(c.endpoint.SessionFile)
+	var sess session.Storage = NewFileSession(c.endpoint.SessionFile)
+	if c.endpoint.Session != nil {
+		sess = c.endpoint.Session
+	}
 	// Read before connecting, since gotd stores a fresh key as soon as it has
 	// one: whether there was a session decides whether a 401 is a log out that
 	// ends the account or a start with nothing to log out of (#297).

@@ -12,17 +12,18 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sorokin-vladimir/tele/internal/accountstate"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 )
 
 func TestReconcile_MatchingIdentityPreservesAccountFiles(t *testing.T) {
 	stateDir := t.TempDir()
 	sessionFile := filepath.Join(stateDir, "session.json")
 	writeSession(t, sessionFile, []byte("account1"))
-	require.NoError(t, accountstate.Record(stateDir, sessionFile))
+	require.NoError(t, accountstate.Record(stateDir, sessionstore.File(sessionFile)))
 	writeFile(t, filepath.Join(stateDir, "state.db"), "private")
 	mediaDir, avatarDir := seedCaches(t, stateDir)
 
-	cleared, reason, err := accountstate.Reconcile(stateDir, sessionFile)
+	cleared, reason, err := accountstate.Reconcile(stateDir, sessionstore.File(sessionFile))
 	require.NoError(t, err)
 	assert.False(t, cleared)
 	assert.Empty(t, reason)
@@ -35,7 +36,7 @@ func TestReconcile_ChangedIdentityRemovesOnlyAccountOwnedFiles(t *testing.T) {
 	stateDir := t.TempDir()
 	sessionFile := filepath.Join(stateDir, "session.json")
 	writeSession(t, sessionFile, []byte("account1"))
-	require.NoError(t, accountstate.Record(stateDir, sessionFile))
+	require.NoError(t, accountstate.Record(stateDir, sessionstore.File(sessionFile)))
 	writeSession(t, sessionFile, []byte("account2"))
 
 	for _, name := range []string{"state.db", "state.db-wal", "state.db-shm", "state.db.backup"} {
@@ -45,7 +46,7 @@ func TestReconcile_ChangedIdentityRemovesOnlyAccountOwnedFiles(t *testing.T) {
 	writeFile(t, filepath.Join(stateDir, "tele.lock"), "kept")
 	mediaDir, avatarDir := seedCaches(t, stateDir)
 
-	cleared, reason, err := accountstate.Reconcile(stateDir, sessionFile)
+	cleared, reason, err := accountstate.Reconcile(stateDir, sessionstore.File(sessionFile))
 	require.NoError(t, err)
 	assert.True(t, cleared)
 	assert.Equal(t, accountstate.CleanupIdentityChanged, reason)
@@ -71,7 +72,7 @@ func TestEnd_RemovesTheSessionAndTheFootprintAndNothingElse(t *testing.T) {
 	stateDir := t.TempDir()
 	sessionFile := filepath.Join(stateDir, "session.json")
 	writeSession(t, sessionFile, []byte("account1"))
-	require.NoError(t, accountstate.Record(stateDir, sessionFile))
+	require.NoError(t, accountstate.Record(stateDir, sessionstore.File(sessionFile)))
 	for _, name := range []string{"state.db", "state.db-wal", "state.db-shm"} {
 		writeFile(t, filepath.Join(stateDir, name), "private")
 	}
@@ -79,7 +80,7 @@ func TestEnd_RemovesTheSessionAndTheFootprintAndNothingElse(t *testing.T) {
 	writeFile(t, filepath.Join(stateDir, "tele.lock"), "kept")
 	mediaDir, avatarDir := seedCaches(t, stateDir)
 
-	require.NoError(t, accountstate.End(stateDir, sessionFile))
+	require.NoError(t, accountstate.End(stateDir, sessionstore.File(sessionFile)))
 
 	assert.NoFileExists(t, sessionFile)
 	assert.NoFileExists(t, filepath.Join(stateDir, "account.id"))
@@ -98,7 +99,7 @@ func TestEnd_WithNoSessionLeft(t *testing.T) {
 	stateDir := t.TempDir()
 	seedCaches(t, stateDir)
 
-	assert.NoError(t, accountstate.End(stateDir, filepath.Join(stateDir, "session.json")))
+	assert.NoError(t, accountstate.End(stateDir, sessionstore.File(filepath.Join(stateDir, "session.json"))))
 }
 
 func TestReconcile_MissingOrUnreadableIdentityClearsUpgradeState(t *testing.T) {
@@ -139,7 +140,7 @@ func TestReconcile_MissingOrUnreadableIdentityClearsUpgradeState(t *testing.T) {
 			tc.setup(t, stateDir, sessionFile)
 			writeFile(t, filepath.Join(stateDir, "state.db"), "legacy private data")
 
-			cleared, reason, err := accountstate.Reconcile(stateDir, sessionFile)
+			cleared, reason, err := accountstate.Reconcile(stateDir, sessionstore.File(sessionFile))
 			require.NoError(t, err)
 			assert.True(t, cleared)
 			if tc.name == "missing session" || tc.name == "unreadable session" {
@@ -156,12 +157,12 @@ func TestRecordUsesCurrentSessionEveryTime(t *testing.T) {
 	stateDir := t.TempDir()
 	sessionFile := filepath.Join(stateDir, "session.json")
 	writeSession(t, sessionFile, []byte("account1"))
-	require.NoError(t, accountstate.Record(stateDir, sessionFile))
+	require.NoError(t, accountstate.Record(stateDir, sessionstore.File(sessionFile)))
 	first, err := os.ReadFile(filepath.Join(stateDir, "account.id"))
 	require.NoError(t, err)
 
 	writeSession(t, sessionFile, []byte("account2"))
-	require.NoError(t, accountstate.Record(stateDir, sessionFile))
+	require.NoError(t, accountstate.Record(stateDir, sessionstore.File(sessionFile)))
 	second, err := os.ReadFile(filepath.Join(stateDir, "account.id"))
 	require.NoError(t, err)
 
@@ -178,7 +179,7 @@ func TestReconcileWithoutUserCacheDirectoryStillClearsState(t *testing.T) {
 	writeSession(t, sessionFile, []byte("account1"))
 	writeFile(t, filepath.Join(stateDir, "state.db"), "legacy private data")
 
-	cleared, reason, err := accountstate.Reconcile(stateDir, sessionFile)
+	cleared, reason, err := accountstate.Reconcile(stateDir, sessionstore.File(sessionFile))
 	require.NoError(t, err)
 	assert.True(t, cleared)
 	assert.Equal(t, accountstate.CleanupNoRecordedIdentity, reason)
@@ -189,7 +190,7 @@ func TestReconcileReportsThePathItCouldNotClear(t *testing.T) {
 	statePath := filepath.Join(t.TempDir(), "not-a-directory")
 	writeFile(t, statePath, "blocked")
 
-	cleared, _, err := accountstate.Reconcile(statePath, filepath.Join(statePath, "session.json"))
+	cleared, _, err := accountstate.Reconcile(statePath, sessionstore.File(filepath.Join(statePath, "session.json")))
 	assert.False(t, cleared)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), statePath)

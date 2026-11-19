@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	"github.com/gotd/td/session"
+
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 )
 
 const accountIDFile = "account.id"
@@ -57,8 +59,8 @@ func cacheDir(stateDir, name string) (string, error) {
 // Reconcile compares the session's auth key with the identity recorded at the
 // last successful sign-in. A missing, unreadable, or different identity clears
 // every account-owned file before any of them can be opened.
-func Reconcile(stateDir, sessionFile string) (bool, CleanupReason, error) {
-	sessionID, sessionErr := sessionIdentity(sessionFile)
+func Reconcile(stateDir string, sess sessionstore.Store) (bool, CleanupReason, error) {
+	sessionID, sessionErr := sessionIdentity(sess)
 	recordedID, recordedErr := recordedIdentity(stateDir)
 	if sessionErr == nil && recordedErr == nil && sessionID == recordedID {
 		return false, "", nil
@@ -82,18 +84,20 @@ func Reconcile(stateDir, sessionFile string) (bool, CleanupReason, error) {
 // in it survives a log out, and a login made with it would bind to it and keep
 // the identity the footprint is told apart by (#297). Call only once nothing
 // holds the account's files open.
-func End(stateDir, sessionFile string) error {
-	for _, path := range []string{sessionFile, filepath.Join(stateDir, accountIDFile)} {
-		if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("remove %s: %w", path, err)
-		}
+func End(stateDir string, sess sessionstore.Store) error {
+	if err := sess.Remove(context.Background()); err != nil {
+		return err
+	}
+	path := filepath.Join(stateDir, accountIDFile)
+	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("remove %s: %w", path, err)
 	}
 	return removeAccountFiles(stateDir)
 }
 
 // Record writes the current session identity after a successful sign-in.
-func Record(stateDir, sessionFile string) error {
-	id, err := sessionIdentity(sessionFile)
+func Record(stateDir string, sess sessionstore.Store) error {
+	id, err := sessionIdentity(sess)
 	if err != nil {
 		return err
 	}
@@ -104,14 +108,14 @@ func Record(stateDir, sessionFile string) error {
 	return nil
 }
 
-func sessionIdentity(path string) (string, error) {
-	loader := session.Loader{Storage: &session.FileStorage{Path: path}}
+func sessionIdentity(sess sessionstore.Store) (string, error) {
+	loader := session.Loader{Storage: sess}
 	data, err := loader.Load(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("read session identity from %s: %w", path, err)
+		return "", fmt.Errorf("read session identity: %w", err)
 	}
 	if len(data.AuthKeyID) == 0 {
-		return "", fmt.Errorf("read session identity from %s: auth key ID is empty", path)
+		return "", fmt.Errorf("read session identity: auth key ID is empty")
 	}
 	return hex.EncodeToString(data.AuthKeyID), nil
 }

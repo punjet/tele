@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/viper"
 
 	"github.com/sorokin-vladimir/tele/internal/proxy"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 	"github.com/sorokin-vladimir/tele/internal/settings"
 )
 
@@ -16,6 +18,9 @@ type TelegramConfig struct {
 	APIID       int    `mapstructure:"api_id"`
 	APIHash     string `mapstructure:"api_hash"`
 	SessionFile string `mapstructure:"session_file"`
+	// SessionStorage is where the session is kept: file or keychain. See
+	// resolveState for what keychain does off macOS.
+	SessionStorage string `mapstructure:"session_storage"`
 }
 
 // ThemeSlots names the theme to use against each terminal background. An empty
@@ -215,6 +220,7 @@ func Load(path, defaultStateDir string) (*Config, error) {
 	cfg.named = namedInFile(v)
 	cfg.resolveNotifications(v)
 	cfg.resolveState(defaultStateDir)
+	cfg.resolveSessionStorage()
 	cfg.ThemesDir = filepath.Join(filepath.Dir(path), themesDirName)
 	cfg.resolveTheme()
 	return &cfg, nil
@@ -383,6 +389,17 @@ func (c *Config) resolveState(defaultStateDir string) {
 		c.StateDir = defaultStateDir
 	}
 	c.Telegram.SessionFile = filepath.Join(c.StateDir, "session.json")
+}
+
+// resolveSessionStorage keeps a keychain request to the one platform that has
+// a Keychain. Elsewhere the session stays in its file and the config says so,
+// rather than refusing to load: the same config file is often shared between
+// machines.
+func (c *Config) resolveSessionStorage() {
+	if c.Telegram.SessionStorage == sessionstore.KindKeychain && runtime.GOOS != "darwin" {
+		c.warn(settings.Host, "telegram.session_storage: keychain is only available on macOS; keeping the session in a file")
+		c.Telegram.SessionStorage = sessionstore.KindFile
+	}
 }
 
 // ExpandTilde replaces a leading ~/ with the user home directory, and a ~

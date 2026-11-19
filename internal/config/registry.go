@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/sorokin-vladimir/tele/internal/proxy"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 	"github.com/sorokin-vladimir/tele/internal/settings"
 )
 
@@ -57,6 +58,16 @@ var registry = []settings.Entry{
 		Widget:   settings.Text,
 		Applies:  settings.Startup,
 		ReadOnly: true,
+	},
+	{
+		Key:     "telegram.session_storage",
+		Process: settings.Host,
+		Group:   "telegram",
+		Label:   "Session storage",
+		Help:    "Where the signed-in session is kept. file is session.json in the state directory; keychain is the macOS login Keychain, and only works on macOS. Choosing keychain moves an existing session.json into it on the next start.",
+		Widget:  settings.Choice,
+		Applies: settings.Startup,
+		Choices: []string{sessionstore.KindFile, sessionstore.KindKeychain},
 	},
 	{
 		Key:     "proxy.type",

@@ -136,6 +136,7 @@ func TestRegistry_TheHostsSettings(t *testing.T) {
 		"telegram.api_hash",
 		"telegram.api_id",
 		"telegram.session_file",
+		"telegram.session_storage",
 		"ui.history_limit",
 		"ui.notifications.desktop",
 		"ui.notifications.preview",

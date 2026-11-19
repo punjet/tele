@@ -24,6 +24,7 @@ func defaultValues() map[string]any {
 		// one.
 		"proxy.type":                 proxy.TypeAuto,
 		"proxy.port":                 0,
+		"telegram.session_storage":   "file",
 		"ui.history_limit":           50,
 		"ui.confirm_quit":            false,
 		"ui.notifications.desktop":   true,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 
 	"github.com/sorokin-vladimir/tele/internal/appkey"
 	"github.com/sorokin-vladimir/tele/internal/config"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 	"github.com/sorokin-vladimir/tele/internal/store"
 	internaltg "github.com/sorokin-vladimir/tele/internal/tg"
 	"github.com/sorokin-vladimir/tele/internal/ui/media"
@@ -120,6 +122,18 @@ func TestTakesHold_telegram_session_file(t *testing.T) {
 		"telegram:\n  session_file: "+filepath.Join(dir, "second.json")+"\n")
 
 	assert.Equal(t, filepath.Join(dir, "first.json"), r.endpoint.SessionFile)
+}
+
+func TestTakesHold_telegram_session_storage(t *testing.T) {
+	if runtime.GOOS != "darwin" {
+		t.Skip("keychain is only accepted on macOS; elsewhere both spellings mean file")
+	}
+	r := startNextAfterReload(t, startupKey, "telegram.session_storage",
+		"telegram:\n  session_storage: file\n",
+		"telegram:\n  session_storage: keychain\n")
+
+	_, inKeychain := r.endpoint.Session.(*sessionstore.Keychain)
+	assert.False(t, inKeychain, "the next account moved its session to the Keychain mid-run")
 }
 
 func TestTakesHold_state_dir(t *testing.T) {

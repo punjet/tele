@@ -11,6 +11,12 @@ Older releases are at <https://github.com/sorokin-vladimir/tele/releases>.
 
 ## [Unreleased]
 
+### Added
+
+- `telegram.session_storage: keychain` keeps the Telegram session in the
+  macOS login Keychain instead of `session.json`. Off by default; an
+  existing `session.json` is imported on the next start (#381).
+
 ## [2.1.3] - 2026-11-13
 
 ### Added
