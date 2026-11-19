@@ -43,8 +43,8 @@ func (f *fakeSecurity) run(_ context.Context, stdin string, args ...string) ([]b
 		}
 		return ""
 	}
-	switch {
-	case args[0] == "-i":
+	switch args[0] {
+	case "-i":
 		if f.failAdd {
 			return nil, 0, nil
 		}
@@ -67,13 +67,13 @@ func (f *fakeSecurity) run(_ context.Context, stdin string, args ...string) ([]b
 		}
 		f.items[s+"\x00"+a] = w
 		return nil, 0, nil
-	case args[0] == "find-generic-password":
+	case "find-generic-password":
 		v, ok := f.items[flag("-s")+"\x00"+flag("-a")]
 		if !ok {
 			return nil, 44, errors.New("not found")
 		}
 		return []byte(v + "\n"), 0, nil
-	case args[0] == "delete-generic-password":
+	case "delete-generic-password":
 		key := flag("-s") + "\x00" + flag("-a")
 		if _, ok := f.items[key]; !ok {
 			return nil, 44, errors.New("not found")
