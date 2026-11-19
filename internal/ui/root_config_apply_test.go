@@ -92,6 +92,11 @@ func TestTakesHold_photos_max_long_side_px(t *testing.T) {
 		func(m RootModel) any { return m.chat.MaxMediaPx() }, 1234)
 }
 
+func TestTakesHold_photos_quick_look(t *testing.T) {
+	takesHoldOnReload(t, "photos.quick_look", true,
+		func(m RootModel) any { return m.quickLookEnabled() }, true)
+}
+
 // mediaOwner refuses every download and remembers which were asked for.
 type mediaOwner struct {
 	Owner

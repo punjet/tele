@@ -17,6 +17,10 @@ Older releases are at <https://github.com/sorokin-vladimir/tele/releases>.
   just added to, and a first message you sent from another device now show up
   in the chat list at once, instead of after the next restart.
 
+### Added
+
+- `photos.quick_look` opens a video, round video, audio file or document in the Quick Look panel on macOS instead of the default app.
+
 ## [2.1.3] - 2026-11-13
 
 ### Added

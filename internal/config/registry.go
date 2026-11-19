@@ -282,6 +282,15 @@ var registry = []settings.Entry{
 		Min:     0,
 	},
 	{
+		Key:     "photos.quick_look",
+		Process: settings.Client,
+		Group:   "photos",
+		Label:   "Quick Look",
+		Help:    "On macOS, open a video, round video, audio file or document in the Quick Look preview, the one Finder shows on Space, instead of the default application. Photos are not affected. Ignored on other systems.",
+		Widget:  settings.Toggle,
+		Applies: settings.Immediate,
+	},
+	{
 		Key:     "avatars.disk_cache_size",
 		Process: settings.Host,
 		Group:   "avatars",

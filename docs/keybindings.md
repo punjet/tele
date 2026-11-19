@@ -64,7 +64,7 @@ The chat list keys move through them.
 | `x`       | Cancel staged upload / clear reply or edit |
 | `s`       | Download the selected file     |
 | `g`       | Jump to original (for replies), however old |
-| `o`       | Open / view media: photo in the OS viewer, video inline (Kitty + ffmpeg) or in the system player |
+| `o`       | Open / view media: photo in the OS viewer, video inline (Kitty + ffmpeg) or in the system player (Quick Look on macOS with `photos.quick_look`) |
 | `O`       | Open the selected video in the external player |
 | `p`       | Play voice message (in-app)    |
 | `P`       | Profile of the selected message's author, or of the person in a private chat |
@@ -203,7 +203,7 @@ These are the action names usable as YAML keys in the `keybindings:` section (gr
 | `normal`            | Leave insert mode / close the chat       |
 | `message_search`    | Search the open chat's messages          |
 | `open_context_menu` | Open the message context menu            |
-| `open_in_viewer`    | Open / view the selected media: photo in the OS viewer, video inline or in the system player |
+| `open_in_viewer`    | Open / view the selected media: photo in the OS viewer, video inline or in the system player (Quick Look on macOS with `photos.quick_look`) |
 | `open_external`     | Open the selected video in the external player |
 | `play_voice`        | Play the selected voice message in-app    |
 | `reply`             | Reply to the selected message            |

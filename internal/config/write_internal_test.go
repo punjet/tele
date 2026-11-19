@@ -298,7 +298,7 @@ func TestSiblingOrder(t *testing.T) {
 // Two settings are called disk_cache_size, in different sections. Ordering must
 // follow the path rather than the last segment of it.
 func TestSiblingOrder_DistinguishesSectionsWithTheSameKeyName(t *testing.T) {
-	assert.Equal(t, []string{"eager_full_quality", "mode", "kitty_placement_cap", "max_long_side_px", "disk_cache_size"}, siblingOrder([]string{"photos"}))
+	assert.Equal(t, []string{"eager_full_quality", "mode", "kitty_placement_cap", "max_long_side_px", "disk_cache_size", "quick_look"}, siblingOrder([]string{"photos"}))
 	assert.Equal(t, []string{"disk_cache_size"}, siblingOrder([]string{"avatars"}))
 }
 
