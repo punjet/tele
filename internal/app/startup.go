@@ -4,6 +4,7 @@ import (
 	"github.com/sorokin-vladimir/tele/internal/appkey"
 	"github.com/sorokin-vladimir/tele/internal/config"
 	"github.com/sorokin-vladimir/tele/internal/proxy"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 	internaltg "github.com/sorokin-vladimir/tele/internal/tg"
 )
 
@@ -20,6 +21,7 @@ type startup struct {
 	key           appkey.Key
 	stateDir      string
 	sessionFile   string
+	session       sessionstore.Store
 	sessionPinned bool
 	route         proxy.Route
 	// The cache budgets, in bytes. Zero keeps nothing between runs.
@@ -41,6 +43,7 @@ func newStartup(cfg *config.Config, key appkey.Key) (startup, error) {
 		key:             key,
 		stateDir:        cfg.StateDir,
 		sessionFile:     cfg.Telegram.SessionFile,
+		session:         sessionstore.Open(cfg.Telegram.SessionStorage, cfg.StateDir, cfg.Telegram.SessionFile),
 		sessionPinned:   cfg.SessionPinned,
 		route:           route,
 		mediaCacheSize:  cfg.Photos.DiskCacheSize,
@@ -55,5 +58,5 @@ func (s startup) endpoint() (internaltg.Endpoint, error) {
 	if err != nil {
 		return internaltg.Endpoint{}, err
 	}
-	return internaltg.Endpoint{Key: s.key, SessionFile: s.sessionFile, Resolver: resolver}, nil
+	return internaltg.Endpoint{Key: s.key, SessionFile: s.sessionFile, Session: s.session, Resolver: resolver}, nil
 }

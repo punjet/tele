@@ -21,6 +21,7 @@ import (
 	"github.com/sorokin-vladimir/tele/internal/ipc"
 	"github.com/sorokin-vladimir/tele/internal/ipc/dial"
 	"github.com/sorokin-vladimir/tele/internal/ipc/wire"
+	"github.com/sorokin-vladimir/tele/internal/sessionstore"
 	"github.com/sorokin-vladimir/tele/internal/statedir"
 	"github.com/sorokin-vladimir/tele/internal/version"
 )
@@ -174,7 +175,16 @@ func (r run) startHost(kept wire.Keeper) (*hosted, error) {
 		}
 		h.stateMoved = moved
 	}
-	cleared, reason, err := accountstate.Reconcile(cfg.StateDir, cfg.Telegram.SessionFile)
+	// Same store the account will open, so Reconcile reads the session where
+	// it lives; a session.json left from before the Keychain is imported first.
+	sess := sessionstore.Open(cfg.Telegram.SessionStorage, cfg.StateDir, cfg.Telegram.SessionFile)
+	if imported, err := sessionstore.Prepare(context.Background(), sess, cfg.Telegram.SessionFile); err != nil {
+		h.stop(core.StopQuit)
+		return nil, fmt.Errorf("session storage: %w", err)
+	} else if imported {
+		r.log.Info("session moved into the keychain")
+	}
+	cleared, reason, err := accountstate.Reconcile(cfg.StateDir, sess)
 	if err != nil {
 		h.stop(core.StopQuit)
 		return nil, fmt.Errorf("account state: %w", err)

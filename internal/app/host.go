@@ -58,7 +58,7 @@ func (h *Host) openNext() (*account, error) {
 		// The session identity is recorded once the login succeeds. Who
 		// logged in reaches the clients through the account projection.
 		onAuth: func(int64, string) {
-			if err := accountstate.Record(h.startup.stateDir, h.startup.sessionFile); err != nil {
+			if err := accountstate.Record(h.startup.stateDir, h.startup.session); err != nil {
 				h.log.Error("record account identity", zap.Error(err))
 			}
 		},
@@ -159,7 +159,7 @@ func (h *Host) endAccount(ctx context.Context, acct *account, reason core.EndRea
 	h.clients.Leave(core.AccountEnded{Reason: reason, Discarded: discarded})
 	acct.stop()
 
-	if err := accountstate.End(acct.startup.stateDir, acct.startup.sessionFile); err != nil {
+	if err := accountstate.End(acct.startup.stateDir, acct.startup.session); err != nil {
 		h.log.Error("the account that ended could not be removed", zap.Error(err))
 		h.clients.Tell(core.HostFailure{Err: telerr.From(fmt.Errorf("the account that ended could not be removed: %w", err))})
 		return
