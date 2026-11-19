@@ -1,0 +1,21 @@
+# Fork-only: run one package/test many times on a branch (flake hunting),
+# so nothing is compiled on the laptop.
+# gh workflow run test-one.yml -R punjet/tele -f ref=<branch> -f pkg=./internal/core -f run=TestX -f count=20
+name: test-one
+on:
+  workflow_dispatch:
+    inputs:
+      ref: {description: branch or SHA, required: true}
+      pkg: {description: package, required: true, default: ./...}
+      run: {description: -run regexp, required: false, default: .}
+      count: {description: -count, required: false, default: "1"}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with: {ref: "${{ inputs.ref }}"}
+      - uses: actions/setup-go@v6
+        with: {go-version-file: go.mod, cache: true}
+      - run: go test -race -timeout 15m -count "${{ inputs.count }}" -run "${{ inputs.run }}" "${{ inputs.pkg }}"
