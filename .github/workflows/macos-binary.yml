@@ -1,0 +1,38 @@
+# Fork-only: builds a macOS arm64 binary of any branch, so nothing is compiled
+# on the (8 GB) laptop. Run: gh workflow run macos-binary.yml -R punjet/tele -f ref=<branch>
+name: macos-binary
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: branch, tag or SHA to build
+        required: true
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    env:
+      CGO_ENABLED: 0
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: build
+        run: |
+          v="$(git describe --tags --always)-local"
+          go build -trimpath \
+            -ldflags "-s -w -X github.com/sorokin-vladimir/tele/internal/version.Version=$v" \
+            -o tele ./cmd/tele/
+          ./tele --version
+          shasum -a 256 tele | tee tele.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tele-darwin-arm64
+          path: |
+            tele
+            tele.sha256
+          retention-days: 14
