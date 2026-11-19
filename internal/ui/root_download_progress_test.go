@@ -34,7 +34,7 @@ func TestDownloadsBehindTheIndicatorAskForProgress(t *testing.T) {
 	defer restore()
 
 	saveFileCmd(context.Background(), o, 1, 5, domain.DocFull, t.TempDir(), 7)()
-	openDocumentCmd(context.Background(), o, 1, 5, t.TempDir(), 3, false)()
+	openDocumentCmd(context.Background(), o, 1, 5, t.TempDir(), 3, "")()
 
 	assert.Equal(t, []string{"7", "3"}, o.saveRefs)
 }

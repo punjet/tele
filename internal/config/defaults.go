@@ -38,6 +38,7 @@ func defaultValues() map[string]any {
 		"photos.max_long_side_px":    800,
 		"photos.disk_cache_size":     int64(256 * 1024 * 1024),
 		"photos.quick_look":          false,
+		"photos.quick_look_command":  "",
 		"avatars.disk_cache_size":    int64(16 * 1024 * 1024),
 		"cli.name_width":             20,
 		"cli.account_commands":       "read",

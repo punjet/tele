@@ -67,6 +67,7 @@ photos:
   max_long_side_px: 800 # cap a rendered image's long side; height also ≤ 2/3 pane
   disk_cache_size: 268435456 # 256 MB of fetched chat media kept between runs
   quick_look: false # macOS: open video, audio and documents in Quick Look, not the default app
+  quick_look_command: "" # the program that shows Quick Look; empty uses qlmanage
 
 avatars:
   disk_cache_size: 16777216 # 16 MB of people's pictures, budgeted separately
@@ -284,6 +285,8 @@ Raise it for larger inline images, lower it for more compact ones.
 `quick_look` is for macOS: a video, round video, audio file or document opens in the Quick Look panel, the preview Finder shows on Space, instead of the default app.
 Photos are not affected.
 It is off by default and ignored on other systems; see [media.md](media.md#quick-look-macos).
+`quick_look_command` names the program that shows the panel, given the file as its one argument.
+Empty uses `qlmanage -p`, which on recent macOS aborts on video; a small app that hosts the Quick Look panel previews video too.
 
 ## Avatars
 

@@ -291,6 +291,15 @@ var registry = []settings.Entry{
 		Applies: settings.Immediate,
 	},
 	{
+		Key:     "photos.quick_look_command",
+		Process: settings.Client,
+		Group:   "photos",
+		Label:   "Quick Look program",
+		Help:    "The program that shows the Quick Look panel, given the file as its one argument. Empty uses qlmanage, which cannot preview video on recent macOS.",
+		Widget:  settings.Text,
+		Applies: settings.Immediate,
+	},
+	{
 		Key:     "avatars.disk_cache_size",
 		Process: settings.Host,
 		Group:   "avatars",
