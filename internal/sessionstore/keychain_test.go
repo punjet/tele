@@ -2,6 +2,7 @@ package sessionstore
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"os"
 	"path/filepath"
@@ -172,11 +173,10 @@ func TestKeychain_TheSecretIsNeverInArgv(t *testing.T) {
 func TestKeychain_StoreRefusesASessionTooLongForTheTool(t *testing.T) {
 	k := newKeychain("tele-test", "/state", newFake().run)
 	random := make([]byte, 6000)
-	for i := range random {
-		random[i] = byte((i * 2654435761) >> 7)
-	}
+	_, err := rand.Read(random) // incompressible, so it stays long once gzipped
+	require.NoError(t, err)
 
-	err := k.StoreSession(context.Background(), random)
+	err = k.StoreSession(context.Background(), random)
 
 	assert.Error(t, err)
 }

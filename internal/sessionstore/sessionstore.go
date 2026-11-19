@@ -29,25 +29,25 @@ type Store interface {
 
 // File keeps the session in the file at path, as tele always has.
 func File(path string) Store {
-	return fileStore{inner: session.FileStorage{Path: path}}
+	return &fileStore{inner: session.FileStorage{Path: path}}
 }
 
 type fileStore struct {
 	inner session.FileStorage
 }
 
-func (s fileStore) LoadSession(ctx context.Context) ([]byte, error) {
+func (s *fileStore) LoadSession(ctx context.Context) ([]byte, error) {
 	return s.inner.LoadSession(ctx)
 }
 
-func (s fileStore) StoreSession(ctx context.Context, data []byte) error {
+func (s *fileStore) StoreSession(ctx context.Context, data []byte) error {
 	if err := os.MkdirAll(filepath.Dir(s.inner.Path), 0o700); err != nil {
 		return err
 	}
 	return s.inner.StoreSession(ctx, data)
 }
 
-func (s fileStore) Remove(context.Context) error {
+func (s *fileStore) Remove(context.Context) error {
 	if err := os.Remove(s.inner.Path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("remove %s: %w", s.inner.Path, err)
 	}
