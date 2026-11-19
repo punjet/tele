@@ -266,8 +266,8 @@ func TestKeychain_ImportWithNoFileDoesNothing(t *testing.T) {
 }
 
 func TestOpen_FileIsTheDefault(t *testing.T) {
-	assert.IsType(t, fileStore{}, Open("", "/state", "/state/session.json"))
-	assert.IsType(t, fileStore{}, Open(KindFile, "/state", "/state/session.json"))
+	assert.IsType(t, &fileStore{}, Open("", "/state", "/state/session.json"))
+	assert.IsType(t, &fileStore{}, Open(KindFile, "/state", "/state/session.json"))
 	assert.IsType(t, &Keychain{}, Open(KindKeychain, "/state", "/state/session.json"))
 }
 
